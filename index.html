@@ -1,49 +1,58 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <title>量化收益专业看板 · 数据驱动</title>
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <title>量化资产统计仪表盘</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { margin:0; padding:20px; font-family:Segoe UI,Arial; background:#0f172a; color:#e5e7eb; }
-    h1 { margin-bottom:8px; }
-    .hint { font-size:12px; color:#94a3b8; margin-bottom:14px; }
-    .container { display:flex; gap:20px; }
-    .table-container { width:45%; max-height:620px; overflow:auto; border:1px solid #1e293b; }
-    .chart-container { width:55%; }
-    table { border-collapse:collapse; width:100%; font-size:13px; background:#020617; }
-    th,td { border:1px solid #1e293b; padding:6px 8px; text-align:right; }
-    th { position:sticky; top:0; background:#020617; text-align:center; }
-    td:first-child,th:first-child { text-align:center; }
-    tr:hover { background:#1e293b; cursor:pointer; }
-    .chart { width:100%; height:620px; }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background:#f5f7fa; }
+    h1 { text-align:center; margin:16px 0; }
+    .container { display:flex; padding:16px; gap:16px; }
+    .left { width:50%; overflow:auto; background:#fff; border-radius:8px; padding:12px; }
+    .right { width:50%; background:#fff; border-radius:8px; padding:12px; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    th, td { border:1px solid #ddd; padding:6px 8px; text-align:right; }
+    th { background:#f0f2f5; position:sticky; top:0; }
+    th:first-child, td:first-child { text-align:center; }
+    canvas { width:100% !important; height:420px !important; }
+    .note { font-size:12px; color:#666; margin-top:8px; }
   </style>
 </head>
 <body>
 
-<h1>📈 量化收益专业看板（数据驱动）</h1>
-<div class="hint">唯一数据源 → 自动生成表格 / 图表 / 指标 · 每天只需新增一行数据</div>
+<h1>量化资产长期统计仪表盘</h1>
 
 <div class="container">
-  <div class="table-container">
+  <div class="left">
     <table id="dataTable">
       <thead>
         <tr>
-          <th>日期</th><th>BNB</th><th>ETH</th><th>BTC</th><th>Bybit</th>
-          <th>BNB%</th><th>ETH%</th><th>BTC%</th><th>Bybit%</th>
+          <th>日期</th>
+          <th>BNB</th>
+          <th>ETH</th>
+          <th>BTC</th>
+          <th>Bybit</th>
+          <th>BNB%</th>
+          <th>ETH%</th>
+          <th>BTC%</th>
+          <th>Bybit%</th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
-  <div class="chart-container">
-    <div id="chart" class="chart"></div>
+
+  <div class="right">
+    <canvas id="lineChart"></canvas>
+    <div class="note">
+      BNB / ETH / BTC 基准日：2025/12/12 ｜ Bybit 基准日：2025/12/25
+    </div>
   </div>
 </div>
 
 <script>
 /**********************
- * ① 唯一数据源（长期维护只改这里）
+ * ① 原始数据区（你每天只需要维护这里）
  **********************/
 const rawData = [
   { date:'2025/12/12', bnb:4.94, eth:4.89335652, btc:0.06806163, bybit:0 },
@@ -55,21 +64,18 @@ const rawData = [
   { date:'2025/12/29', bnb:5.10, eth:5.17264088, btc:0.06920239, bybit:3195 },
   { date:'2025/12/30', bnb:5.11, eth:5.21396609, btc:0.06961127, bybit:3260 },
   { date:'2025/12/31', bnb:5.11, eth:5.22510837, btc:0.06968869, bybit:3271 },
-  { date:'2026/1/6',  bnb:5.11, eth:5.1418926,  btc:0.06843291, bybit:3169 },
-  { date:'2026/1/7',  bnb:5.12, eth:5.1409764,  btc:0.06957516, bybit:3137 },
-  { date:'2026/1/8',  bnb:5.12, eth:5.24190189, btc:0.07076123, bybit:3353 },
-  { date:'2026/1/9',  bnb:5.12, eth:5.26411513, btc:0.0712538,  bybit:3383 },
-  { date:'2026/1/10', bnb:5.13, eth:5.29326015, btc:0.07185878, bybit:3448 }
+  { date:'2026/01/06', bnb:5.11, eth:5.1418926,  btc:0.06843291, bybit:3169 },
+  { date:'2026/01/07', bnb:5.12, eth:5.1409764,  btc:0.06957516, bybit:3137 },
+  { date:'2026/01/08', bnb:5.12, eth:5.24190189, btc:0.07076123, bybit:3353 },
+  { date:'2026/01/09', bnb:5.12, eth:5.26411513, btc:0.0712538,  bybit:3383 },
+  { date:'2026/01/10', bnb:5.13, eth:5.29326015, btc:0.07185878, bybit:3448 },
+  { date:'2026/01/11', bnb:5.13, eth:5.310188306,btc:0.07187337, bybit:3455 }
 ];
 
 /**********************
  * ② 自动计算收益百分比
  **********************/
 const base = rawData[0];
-// BNB / ETH / BTC 以第一天为基准
-const base = rawData[0];
-
-// Bybit 以 2025/12/25 为基准
 const bybitBaseDate = '2025/12/25';
 const bybitBase = rawData.find(d => d.date === bybitBaseDate);
 
@@ -78,7 +84,6 @@ rawData.forEach(d => {
   d.ethP = ((d.eth - base.eth) / base.eth * 100).toFixed(2);
   d.btcP = ((d.btc - base.btc) / base.btc * 100).toFixed(2);
 
-  // Bybit：基准日前统一为 0
   if (!bybitBase || d.date < bybitBaseDate) {
     d.bybitP = '0.00';
   } else {
@@ -94,46 +99,44 @@ rawData.forEach(d => {
   const tr = document.createElement('tr');
   tr.innerHTML = `
     <td>${d.date}</td>
-    <td>${d.bnb}</td><td>${d.eth}</td><td>${d.btc}</td><td>${d.bybit}</td>
-    <td>${d.bnbP}%</td><td>${d.ethP}%</td><td>${d.btcP}%</td><td>${d.bybitP}%</td>`;
+    <td>${d.bnb}</td>
+    <td>${d.eth}</td>
+    <td>${d.btc}</td>
+    <td>${d.bybit}</td>
+    <td>${d.bnbP}%</td>
+    <td>${d.ethP}%</td>
+    <td>${d.btcP}%</td>
+    <td>${d.bybitP}%</td>
+  `;
   tbody.appendChild(tr);
 });
 
 /**********************
- * ④ 图表数据
+ * ④ 折线图
  **********************/
-const dates = rawData.map(d => d.date);
-const BNB = rawData.map(d => +d.bnbP);
-const ETH = rawData.map(d => +d.ethP);
-const BTC = rawData.map(d => +d.btcP);
-const Bybit = rawData.map(d => +d.bybitP);
-const Total = rawData.map((_,i)=>((BNB[i]+ETH[i]+BTC[i]+Bybit[i])/4).toFixed(2));
+const labels = rawData.map(d => d.date);
 
-const chart = echarts.init(document.getElementById('chart'));
-chart.setOption({
-  backgroundColor:'#020617',
-  tooltip:{ trigger:'axis', valueFormatter:v=>v+'%' },
-  legend:{ textStyle:{color:'#e5e7eb'} },
-  xAxis:{ type:'category', data:dates, axisLine:{lineStyle:{color:'#475569'}} },
-  yAxis:[
-    { type:'value', axisLabel:{formatter:'{value}%'}, axisLine:{lineStyle:{color:'#475569'}} },
-    { type:'value', axisLabel:{formatter:'{value}%'}, axisLine:{lineStyle:{color:'#475569'}} }
-  ],
-  series:[
-    { name:'BNB%', type:'line', smooth:true, data:BNB },
-    { name:'ETH%', type:'line', smooth:true, data:ETH },
-    { name:'BTC%', type:'line', smooth:true, data:BTC },
-    { name:'Bybit%', type:'line', smooth:true, yAxisIndex:1, data:Bybit },
-    { name:'总收益%', type:'line', smooth:true, lineStyle:{type:'dashed'}, data:Total }
-  ]
-});
-
-/**********************
- * ⑤ 表格 ↔ 图表联动
- **********************/
-[...tbody.children].forEach((tr,i)=>{
-  tr.onclick=()=>chart.dispatchAction({ type:'showTip', seriesIndex:0, dataIndex:i });
+new Chart(document.getElementById('lineChart'), {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      { label:'BNB %', data: rawData.map(d => d.bnbP), borderWidth:2 },
+      { label:'ETH %', data: rawData.map(d => d.ethP), borderWidth:2 },
+      { label:'BTC %', data: rawData.map(d => d.btcP), borderWidth:2 },
+      { label:'Bybit %', data: rawData.map(d => d.bybitP), borderWidth:2, yAxisID:'y1' }
+    ]
+  },
+  options: {
+    responsive:true,
+    interaction:{ mode:'index', intersect:false },
+    scales: {
+      y: { title:{ display:true, text:'BNB / ETH / BTC %' } },
+      y1:{ position:'right', grid:{ drawOnChartArea:false }, title:{ display:true, text:'Bybit %' } }
+    }
+  }
 });
 </script>
+
 </body>
 </html>
