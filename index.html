@@ -118,20 +118,32 @@ rawData.forEach(d => {
  **********************/
 const labels = rawData.map(d => d.date);
 
+const iconBNB = new Image();
+iconBNB.src = 'https://cryptologos.cc/logos/bnb-bnb-logo.png?v=029';
+const iconETH = new Image();
+iconETH.src = 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=029';
+const iconBTC = new Image();
+iconBTC.src = 'https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=029';
+const iconBybit = new Image();
+iconBybit.src = 'https://seeklogo.com/images/B/bybit-logo-9B7E5C0C0A-seeklogo.com.png';
+
 new Chart(document.getElementById('lineChart'), {
   type: 'line',
   data: {
     labels,
     datasets: [
-      { label:'BNB %', data: rawData.map(d => d.bnbP), borderWidth:2 },
-      { label:'ETH %', data: rawData.map(d => d.ethP), borderWidth:2 },
-      { label:'BTC %', data: rawData.map(d => d.btcP), borderWidth:2 },
-      { label:'Bybit %', data: rawData.map(d => d.bybitP), borderWidth:2, yAxisID:'y1' }
+      { label:'BNB', data: rawData.map(d => d.bnbP), borderWidth:2, pointStyle: iconBNB },
+      { label:'ETH', data: rawData.map(d => d.ethP), borderWidth:2, pointStyle: iconETH },
+      { label:'BTC', data: rawData.map(d => d.btcP), borderWidth:2, pointStyle: iconBTC },
+      { label:'Bybit', data: rawData.map(d => d.bybitP), borderWidth:2, yAxisID:'y1', pointStyle: iconBybit }
     ]
   },
   options: {
     responsive:true,
     interaction:{ mode:'index', intersect:false },
+    plugins:{
+      legend:{ labels:{ usePointStyle:true, boxWidth:14 } }
+    },
     scales: {
       y: { title:{ display:true, text:'BNB / ETH / BTC %' } },
       y1:{ position:'right', grid:{ drawOnChartArea:false }, title:{ display:true, text:'Bybit %' } }
