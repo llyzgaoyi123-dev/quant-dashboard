@@ -132,17 +132,17 @@ new Chart(document.getElementById('lineChart'), {
   data: {
     labels,
     datasets: [
-      { label:'BNB', data: rawData.map(d => d.bnbP), borderWidth:2, pointStyle: iconBNB },
-      { label:'ETH', data: rawData.map(d => d.ethP), borderWidth:2, pointStyle: iconETH },
-      { label:'BTC', data: rawData.map(d => d.btcP), borderWidth:2, pointStyle: iconBTC },
-      { label:'Bybit', data: rawData.map(d => d.bybitP), borderWidth:2, yAxisID:'y1', pointStyle: iconBybit }
+      { label:'BNB', data: rawData.map(d => d.bnbP), borderWidth:2, pointStyle: iconBNB, pointRadius:4, pointHoverRadius:6 },
+      { label:'ETH', data: rawData.map(d => d.ethP), borderWidth:2, pointStyle: iconETH, pointRadius:4, pointHoverRadius:6 },
+      { label:'BTC', data: rawData.map(d => d.btcP), borderWidth:2, pointStyle: iconBTC, pointRadius:4, pointHoverRadius:6 },
+      { label:'Bybit', data: rawData.map(d => d.bybitP), borderWidth:2, yAxisID:'y1', pointStyle: iconBybit, pointRadius:4, pointHoverRadius:6 }
     ]
   },
   options: {
     responsive:true,
     interaction:{ mode:'index', intersect:false },
     plugins:{
-      legend:{ labels:{ usePointStyle:true, boxWidth:14 } }
+      legend:{ labels:{ usePointStyle:true, boxWidth:10, padding:10 } } }
     },
     scales: {
       y: { title:{ display:true, text:'BNB / ETH / BTC %' } },
