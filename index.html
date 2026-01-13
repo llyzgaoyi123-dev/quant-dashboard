@@ -5,17 +5,16 @@
   <title>量化资产统计仪表盘</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { margin:0; font-family:Arial, Helvetica, sans-serif; background:#f5f7fa; }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background:#f5f7fa; }
     h1 { text-align:center; margin:16px 0; }
-    .container { display:flex; gap:16px; padding:16px; }
-    .left, .right { background:#fff; border-radius:8px; padding:12px; }
-    .left { width:50%; overflow:auto; }
-    .right { width:50%; }
+    .container { display:flex; padding:16px; gap:16px; }
+    .left { width:50%; overflow:auto; background:#fff; border-radius:8px; padding:12px; }
+    .right { width:50%; background:#fff; border-radius:8px; padding:12px; }
     table { width:100%; border-collapse:collapse; font-size:13px; }
     th, td { border:1px solid #ddd; padding:6px 8px; text-align:right; }
     th { background:#f0f2f5; position:sticky; top:0; }
     th:first-child, td:first-child { text-align:center; }
-    canvas { height:420px !important; }
+    canvas { width:100% !important; height:420px !important; }
     .note { font-size:12px; color:#666; margin-top:8px; }
   </style>
 </head>
@@ -46,65 +45,96 @@
   <div class="right">
     <canvas id="lineChart"></canvas>
     <div class="note">
-      BNB / ETH / BTC 基准日：2025/12/12 ｜ Bybit 基准日：2025/12/25
+      BNB / ETH / BTC 基准日：2025/12/12 ｜ Bybit 基准日：2026/01/13
     </div>
   </div>
 </div>
 
 <script>
-/************ 数据区 ************/
+/**********************
+ * ① 原始数据区（你每天只需要维护这里）
+ **********************/
 const rawData = [
   { date:'2025/12/12', bnb:4.94, eth:4.89335652, btc:0.06806163, bybit:0 },
   { date:'2025/12/15', bnb:4.96, eth:4.97927232, btc:0.06831465, bybit:0 },
   { date:'2025/12/17', bnb:5.05, eth:5.00693555, btc:0.06825674, bybit:1000 },
   { date:'2025/12/22', bnb:5.09, eth:5.06693069, btc:0.06853804, bybit:1796 },
-  { date:'2025/12/25', bnb:5.09, eth:5.1412678, btc:0.06909271, bybit:3171 },
+  { date:'2025/12/25', bnb:5.09, eth:5.1412678,  btc:0.06909271, bybit:3171 },
   { date:'2025/12/27', bnb:5.09, eth:5.17173604, btc:0.06920976, bybit:3189 },
   { date:'2025/12/29', bnb:5.10, eth:5.17264088, btc:0.06920239, bybit:3195 },
   { date:'2025/12/30', bnb:5.11, eth:5.21396609, btc:0.06961127, bybit:3260 },
   { date:'2025/12/31', bnb:5.11, eth:5.22510837, btc:0.06968869, bybit:3271 },
-  { date:'2026/01/06', bnb:5.11, eth:5.1418926, btc:0.06843291, bybit:3169 },
-  { date:'2026/01/07', bnb:5.12, eth:5.1409764, btc:0.06957516, bybit:3137 },
+  { date:'2026/01/06', bnb:5.11, eth:5.1418926,  btc:0.06843291, bybit:3169 },
+  { date:'2026/01/07', bnb:5.12, eth:5.1409764,  btc:0.06957516, bybit:3137 },
   { date:'2026/01/08', bnb:5.12, eth:5.24190189, btc:0.07076123, bybit:3353 },
-  { date:'2026/01/09', bnb:5.12, eth:5.26411513, btc:0.0712538, bybit:3383 },
+  { date:'2026/01/09', bnb:5.12, eth:5.26411513, btc:0.0712538,  bybit:3383 },
   { date:'2026/01/10', bnb:5.13, eth:5.29326015, btc:0.07185878, bybit:3448 },
-  { date:'2026/01/11', bnb:5.13, eth:5.310188306, btc:0.07187337, bybit:3455 },
+  { date:'2026/01/11', bnb:5.13, eth:5.310188306,btc:0.07187337, bybit:3455 },
   { date:'2026/01/12', bnb:5.13, eth:5.29713226, btc:0.07179322, bybit:3441 },
-  { date:'2026/01/13', bnb:5.13, eth:5.32425395, btc:0.07230553, bybit:3494 }
+  { date:'2026/01/13', bnb:5.13, eth:5.32425395, btc:0.07230553, bybit:7794 }
 ];
 
-/************ 百分比计算 ************/
+/**********************
+ * ② 自动计算收益百分比
+ **********************/
 const base = rawData[0];
-const bybitBase = rawData.find(d => d.date === '2025/12/25');
+const bybitBaseDate = '2026/01/13';
+const bybitBase = rawData.find(d => d.date === bybitBaseDate);
 
 rawData.forEach(d => {
   d.bnbP = ((d.bnb - base.bnb) / base.bnb * 100).toFixed(2);
   d.ethP = ((d.eth - base.eth) / base.eth * 100).toFixed(2);
   d.btcP = ((d.btc - base.btc) / base.btc * 100).toFixed(2);
-  d.bybitP = (!bybitBase || d.date < '2025/12/25')
-    ? '0.00'
-    : ((d.bybit - bybitBase.bybit) / bybitBase.bybit * 100).toFixed(2);
+
+  if (!bybitBase || d.date < bybitBaseDate) {
+    d.bybitP = '0.00';
+  } else {
+    d.bybitP = ((d.bybit - bybitBase.bybit) / bybitBase.bybit * 100).toFixed(2);
+  }
 });
 
-/************ 表格 ************/
+/**********************
+ * ③ 渲染表格
+ **********************/
 const tbody = document.querySelector('#dataTable tbody');
 rawData.forEach(d => {
-  tbody.insertAdjacentHTML('beforeend', `
-    <tr>
-      <td>${d.date}</td>
-      <td>${d.bnb}</td>
-      <td>${d.eth}</td>
-      <td>${d.btc}</td>
-      <td>${d.bybit}</td>
-      <td>${d.bnbP}%</td>
-      <td>${d.ethP}%</td>
-      <td>${d.btcP}%</td>
-      <td>${d.bybitP}%</td>
-    </tr>
-  `);
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${d.date}</td>
+    <td>${d.bnb}</td>
+    <td>${d.eth}</td>
+    <td>${d.btc}</td>
+    <td>${d.bybit}</td>
+    <td>${d.bnbP}%</td>
+    <td>${d.ethP}%</td>
+    <td>${d.btcP}%</td>
+    <td>${d.bybitP}%</td>
+  `;
+  tbody.appendChild(tr);
 });
 
+/**********************
+ * ④ 折线图
+ **********************/
+const labels = rawData.map(d => d.date);
+
+const iconBNB = new Image();
+iconBNB.src = 'https://cryptologos.cc/logos/bnb-bnb-logo.png?v=029';
+const iconETH = new Image();
+iconETH.src = 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=029';
+const iconBTC = new Image();
+iconBTC.src = 'https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=029';
+const iconBybit = new Image();
+iconBybit.src = 'https://seeklogo.com/images/B/bybit-logo-9B7E5C0C0A-seeklogo.com.png';
+
 /************ 折线图 ************/
+const iconMap = {
+  BNB: 'https://cryptologos.cc/logos/bnb-bnb-logo.png?v=029',
+  ETH: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=029',
+  BTC: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=029',
+  Bybit: 'https://seeklogo.com/images/B/bybit-logo-9B7E5C0C0A-seeklogo.com.png'
+};
+
 new Chart(document.getElementById('lineChart'), {
   type: 'line',
   data: {
@@ -118,6 +148,23 @@ new Chart(document.getElementById('lineChart'), {
   },
   options: {
     interaction:{ mode:'index', intersect:false },
+    plugins:{
+      legend:{
+        labels:{
+          usePointStyle:true,
+          boxWidth:14,
+          generateLabels(chart){
+            const labels = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+            labels.forEach(l => {
+              const img = new Image();
+              img.src = iconMap[l.text];
+              l.pointStyle = img;
+            });
+            return labels;
+          }
+        }
+      }
+    },
     scales:{
       y:{ title:{ display:true, text:'BNB / ETH / BTC %' }},
       y1:{ position:'right', grid:{ drawOnChartArea:false }, title:{ display:true, text:'Bybit %' }}
@@ -125,5 +172,6 @@ new Chart(document.getElementById('lineChart'), {
   }
 });
 </script>
+
 </body>
 </html>
