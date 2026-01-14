@@ -2,14 +2,15 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <title>量化资产统计仪表盘</title>
+  <title>量化资产统计仪表盘（主线稳定版）</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background:#f5f7fa; }
+    body { margin:0; font-family: Arial, Helvetica, sans-serif; background:#f5f7fa; }
     h1 { text-align:center; margin:16px 0; }
-    .container { display:flex; padding:16px; gap:16px; }
-    .left { width:50%; overflow:auto; background:#fff; border-radius:8px; padding:12px; }
-    .right { width:50%; background:#fff; border-radius:8px; padding:12px; }
+    .container { display:flex; gap:16px; padding:16px; }
+    .left, .right { background:#fff; border-radius:8px; padding:12px; }
+    .left { width:50%; overflow:auto; }
+    .right { width:50%; }
     table { width:100%; border-collapse:collapse; font-size:13px; }
     th, td { border:1px solid #ddd; padding:6px 8px; text-align:right; }
     th { background:#f0f2f5; position:sticky; top:0; }
@@ -52,7 +53,7 @@
 
 <script>
 /**********************
- * ① 原始数据区（你每天只需要维护这里）
+ * ① 原始数据区（你每天只维护这里）
  **********************/
 const rawData = [
   { date:'2025/12/12', bnb:4.94, eth:4.89335652, btc:0.06806163, bybit:0 },
@@ -95,9 +96,10 @@ rawData.forEach(d => {
 });
 
 /**********************
- * ③ 渲染表格
+ * ③ 渲染表格（稳定）
  **********************/
 const tbody = document.querySelector('#dataTable tbody');
+tbody.innerHTML = '';
 rawData.forEach(d => {
   const tr = document.createElement('tr');
   tr.innerHTML = `
@@ -115,27 +117,8 @@ rawData.forEach(d => {
 });
 
 /**********************
- * ④ 折线图
+ * ④ 折线图（主线稳定版，无图标）
  **********************/
-const labels = rawData.map(d => d.date);
-
-const iconBNB = new Image();
-iconBNB.src = 'https://cryptologos.cc/logos/bnb-bnb-logo.png?v=029';
-const iconETH = new Image();
-iconETH.src = 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=029';
-const iconBTC = new Image();
-iconBTC.src = 'https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=029';
-const iconBybit = new Image();
-iconBybit.src = 'https://seeklogo.com/images/B/bybit-logo-9B7E5C0C0A-seeklogo.com.png';
-
-/************ 折线图 ************/
-const iconMap = {
-  BNB: 'https://cryptologos.cc/logos/bnb-bnb-logo.png?v=029',
-  ETH: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=029',
-  BTC: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png?v=029',
-  Bybit: 'https://seeklogo.com/images/B/bybit-logo-9B7E5C0C0A-seeklogo.com.png'
-};
-
 new Chart(document.getElementById('lineChart'), {
   type: 'line',
   data: {
@@ -150,22 +133,6 @@ new Chart(document.getElementById('lineChart'), {
   options: {
     interaction:{ mode:'index', intersect:false },
     plugins:{ legend:{ display:true } },
-    scales:{
-      y:{ title:{ display:true, text:'BNB / ETH / BTC %' }},
-      y1:{ position:'right', grid:{ drawOnChartArea:false }, title:{ display:true, text:'Bybit %' }}
-    }
-  }
-});
-            labels.forEach(l => {
-              const img = new Image();
-              img.src = iconMap[l.text];
-              l.pointStyle = img;
-            });
-            return labels;
-          }
-        }
-      }
-    },
     scales:{
       y:{ title:{ display:true, text:'BNB / ETH / BTC %' }},
       y1:{ position:'right', grid:{ drawOnChartArea:false }, title:{ display:true, text:'Bybit %' }}
