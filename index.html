@@ -1,27 +1,68 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8" />
-  <title>量化资产统计仪表盘（稳定版）</title>
+  <meta charset="UTF-8">
+  <title>量化资产长期统计仪表盘</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { margin:0; font-family:Arial, Helvetica, sans-serif; background:#f5f7fa; }
-    h1 { text-align:center; margin:20px 0; }
-    .container { display:flex; gap:16px; padding:16px; }
-    .left, .right { background:#fff; border-radius:8px; padding:12px; }
-    .left { width:50%; overflow:auto; }
-    .right { width:50%; }
-    table { width:100%; border-collapse:collapse; font-size:13px; }
-    th, td { border:1px solid #ddd; padding:6px 8px; text-align:right; }
-    th { background:#f0f2f5; position:sticky; top:0; }
-    th:first-child, td:first-child { text-align:center; }
-    canvas { width:100% !important; height:420px !important; }
-    .note { font-size:12px; color:#666; margin-top:8px; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f5f7fa;
+    }
+    h1 {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .container {
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+    }
+    .left, .right {
+      background: #fff;
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .left {
+      width: 50%;
+      overflow: auto;
+    }
+    .right {
+      width: 50%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 6px 8px;
+      text-align: right;
+    }
+    th {
+      background: #f0f2f5;
+      position: sticky;
+      top: 0;
+    }
+    th:first-child, td:first-child {
+      text-align: center;
+    }
+    canvas {
+      width: 100% !important;
+      height: 420px !important;
+    }
+    .note {
+      font-size: 12px;
+      color: #666;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
 
-<h1>量化资产长期统计仪表盘1</h1>
+<h1>量化资产长期统计仪表盘</h1>
 
 <div class="container">
   <div class="left">
@@ -52,9 +93,7 @@
 </div>
 
 <script>
-/**********************
- * 原始数据（只维护这里）
- **********************/
+/* ===== 原始数据（只维护这里） ===== */
 const rawData = [
   { date:'2025/12/12', bnb:4.94,  eth:4.89335652, btc:0.06806163, bybit:0 },
   { date:'2025/12/15', bnb:4.96,  eth:4.97927232, btc:0.06831465, bybit:0 },
@@ -79,9 +118,7 @@ const rawData = [
   { date:'2026/01/17', bnb:5.143, eth:5.40013786, btc:0.07194955, bybit:9008 }
 ];
 
-/**********************
- * 百分比计算
- **********************/
+/* ===== 百分比计算 ===== */
 const base = rawData[0];
 const bybitBaseDate = '2026/01/14';
 const bybitBase = rawData.find(d => d.date === bybitBaseDate);
@@ -90,6 +127,7 @@ rawData.forEach(d => {
   d.bnbP = ((d.bnb - base.bnb) / base.bnb * 100).toFixed(2);
   d.ethP = ((d.eth - base.eth) / base.eth * 100).toFixed(2);
   d.btcP = ((d.btc - base.btc) / base.btc * 100).toFixed(2);
+
   if (!bybitBase || d.date < bybitBaseDate) {
     d.bybitP = '0.00';
   } else {
@@ -97,9 +135,7 @@ rawData.forEach(d => {
   }
 });
 
-/**********************
- * 表格渲染
- **********************/
+/* ===== 表格渲染 ===== */
 const tbody = document.querySelector('#dataTable tbody');
 rawData.forEach(d => {
   const tr = document.createElement('tr');
@@ -112,29 +148,33 @@ rawData.forEach(d => {
     <td>${d.bnbP}%</td>
     <td>${d.ethP}%</td>
     <td>${d.btcP}%</td>
-    <td>${d.bybitP}%</td>`;
+    <td>${d.bybitP}%</td>
+  `;
   tbody.appendChild(tr);
 });
 
-/**********************
- * 折线图
- **********************/
+/* ===== 折线图 ===== */
 new Chart(document.getElementById('lineChart'), {
-  type:'line',
-  data:{
+  type: 'line',
+  data: {
     labels: rawData.map(d => d.date),
-    datasets:[
-      { label:'BNB',   data: rawData.map(d => d.bnbP),   borderWidth:2, pointRadius:3 },
-      { label:'ETH',   data: rawData.map(d => d.ethP),   borderWidth:2, pointRadius:3 },
-      { label:'BTC',   data: rawData.map(d => d.btcP),   borderWidth:2, pointRadius:3 },
-      { label:'Bybit', data: rawData.map(d => d.bybitP), yAxisID:'y1', borderWidth:2, pointRadius:3 }
+    datasets: [
+      { label: 'BNB', data: rawData.map(d => d.bnbP), borderWidth: 2, pointRadius: 3 },
+      { label: 'ETH', data: rawData.map(d => d.ethP), borderWidth: 2, pointRadius: 3 },
+      { label: 'BTC', data: rawData.map(d => d.btcP), borderWidth: 2, pointRadius: 3 },
+      { label: 'Bybit', data: rawData.map(d => d.bybitP), yAxisID: 'y1', borderWidth: 2, pointRadius: 3 }
     ]
   },
-  options:{
-    interaction:{ mode:'index', intersect:false },
-    scales:{
-      y:{ title:{ display:true, text:'BNB / ETH / BTC %' } },
-      y1:{ position:'right', grid:{ drawOnChartArea:false }, title:{ display:true, text:'Bybit %' } }
+  options: {
+    interaction: { mode: 'index', intersect: false },
+    scales: {
+      y: { title: { display: true, text: 'BNB / ETH / BTC %' } },
+      y1: {
+        position: 'right',
+        grid: { drawOnChartArea: false },
+        title: { display: true, text: 'Bybit %' }
+      }
+    }
   }
 });
 </script>
