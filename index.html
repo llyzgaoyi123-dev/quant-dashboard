@@ -13,10 +13,11 @@
     .right { width:50%; }
     table { width:100%; border-collapse:collapse; font-size:13px; }
     th, td { border:1px solid #ddd; padding:6px 8px; text-align:right; }
-    th { background:#f0f2f5; position:sticky; top:0; }
+    th { background:#f0f2f5; position:sticky; top:0; cursor:pointer; }
     th:first-child, td:first-child { text-align:center; }
     canvas { width:100%!important; height:420px!important; }
     .note { font-size:12px; color:#666; margin-top:8px; }
+    .highlight:hover { background-color: #f0f0f0; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -114,7 +115,7 @@ rawData.forEach((d, index) => {
     <td>${d.btcP}%</td>
     <td>${d.bybitP}%</td>
     <td>${d.asterP}%</td>
-    <td>${index === 14 || index === 15 ? '入金' : ''}</td>
+    <td class="highlight" title="入金">${index === 14 || index === 15 ? '入金' : ''}</td>
   `;
   tbody.appendChild(tr);
 });
