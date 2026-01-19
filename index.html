@@ -93,10 +93,28 @@ rawData.forEach(d => {
   d.bnbP = ((d.bnb - base.bnb) / base.bnb * 100).toFixed(2);
   d.ethP = ((d.eth - base.eth) / base.eth * 100).toFixed(2);
   d.btcP = ((d.btc - base.btc) / base.btc * 100).toFixed(2);
-  d.bybitP = (!bybitBase || d.date < bybitBaseDate)
-    ? '0.00'
-    : ((d.bybit - bybitBase.bybit) / bybitBase.bybit * 100).toFixed(2);
+  let bybitStarted = false;
+
+rawData.forEach(d => {
+  d.aster = ASTER_VALUE;
+
+  d.bnbP = ((d.bnb - base.bnb) / base.bnb * 100).toFixed(2);
+  d.ethP = ((d.eth - base.eth) / base.eth * 100).toFixed(2);
+  d.btcP = ((d.btc - base.btc) / base.btc * 100).toFixed(2);
+
+  if (d.date === bybitBaseDate) {
+    bybitStarted = true;
+  }
+
+  if (!bybitStarted) {
+    d.bybitP = '0.00';
+  } else {
+    d.bybitP = ((d.bybit - bybitBase.bybit) / bybitBase.bybit * 100).toFixed(2);
+  }
+
   d.asterP = '0.00';
+});
+
 });
 
 /* ===== 表格 ===== */
