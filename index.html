@@ -9,11 +9,20 @@
     h1 { text-align:center; margin:20px 0; }
     .container { display:flex; gap:16px; padding:16px; }
     .left,.right { background:#fff; border-radius:8px; padding:12px; }
-    .left { width:50%; overflow:auto; }
+    .left {
+      width:50%;
+      max-height:520px;        /* 只显示约 15 行 */
+      overflow-y:auto;         /* 超出滚动 */
+    }
     .right { width:50%; }
     table { width:100%; border-collapse:collapse; font-size:13px; }
     th,td { border:1px solid #ddd; padding:6px 8px; text-align:right; }
-    th { background:#f0f2f5; position:sticky; top:0; }
+    th {
+      background:#f0f2f5;
+      position:sticky;
+      top:0;
+      z-index:2;               /* 确保滚动时表头在最上层 */
+    }
     th:first-child, td:first-child { text-align:center; }
     canvas { width:100%!important; height:420px!important; }
     .note { font-size:12px; color:#666; margin-top:8px; }
@@ -84,7 +93,7 @@ const rawData = [
   { date:'2026/01/20', bnb:5.154, eth:5.47061225, btc:0.07306381, bybit:9315 }
 ];
 
-/* ===== 百分比计算（Bybit 稳定修复版） ===== */
+/* ===== 百分比计算（Bybit 稳定版） ===== */
 const base = rawData[0];
 const bybitBaseDate = '2026/01/14';
 const bybitBase = rawData.find(d => d.date === bybitBaseDate);
