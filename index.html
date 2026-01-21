@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>量化资产长期统计仪表盘1</title>
+  <title>量化资产长期统计仪表盘</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body { margin:0; font-family:Arial; background:#f5f7fa; }
@@ -11,8 +11,8 @@
     .left,.right { background:#fff; border-radius:8px; padding:12px; }
     .left {
       width:50%;
-      max-height:520px;        /* 只显示约 15 行 */
-      overflow-y:auto;         /* 超出滚动 */
+      max-height:520px;
+      overflow-y:auto;
     }
     .right { width:50%; }
     table { width:100%; border-collapse:collapse; font-size:13px; }
@@ -21,7 +21,7 @@
       background:#f0f2f5;
       position:sticky;
       top:0;
-      z-index:2;               /* 确保滚动时表头在最上层 */
+      z-index:2;
     }
     th:first-child, td:first-child { text-align:center; }
     canvas { width:100%!important; height:420px!important; }
@@ -90,14 +90,14 @@ const rawData = [
   { date:'2026/01/17', bnb:5.143, eth:5.40013786, btc:0.07194955, bybit:9008 },
   { date:'2026/01/18', bnb:5.139, eth:5.39948983, btc:0.07193803, bybit:8996 },
   { date:'2026/01/19', bnb:5.154, eth:5.45121351, btc:0.07273531, bybit:9241 },
-  { date:'2026/01/20', bnb:5.154, eth:5.47061225, btc:0.07306381, bybit:9315 }
+  { date:'2026/01/20', bnb:5.154, eth:5.47061225, btc:0.07306381, bybit:9315 },
+  { date:'2026/01/21', bnb:5.141, eth:5.25520383, btc:0.07164062, bybit:8914 }
 ];
 
-/* ===== 百分比计算（Bybit 稳定版） ===== */
+/* ===== 百分比计算 ===== */
 const base = rawData[0];
 const bybitBaseDate = '2026/01/14';
 const bybitBase = rawData.find(d => d.date === bybitBaseDate);
-
 let bybitStarted = false;
 
 rawData.forEach(d => {
@@ -108,7 +108,6 @@ rawData.forEach(d => {
   d.btcP = ((d.btc - base.btc) / base.btc * 100).toFixed(2);
 
   if (d.date === bybitBaseDate) bybitStarted = true;
-
   d.bybitP = bybitStarted
     ? ((d.bybit - bybitBase.bybit) / bybitBase.bybit * 100).toFixed(2)
     : '0.00';
