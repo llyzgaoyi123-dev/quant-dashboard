@@ -91,10 +91,11 @@ const rawData = [
   { date:'2026/01/18', bnb:5.139, eth:5.39948983, btc:0.07193803, bybit:8996 },
   { date:'2026/01/19', bnb:5.154, eth:5.45121351, btc:0.07273531, bybit:9241 },
   { date:'2026/01/20', bnb:5.154, eth:5.47061225, btc:0.07306381, bybit:9315 },
-  { date:'2026/01/21', bnb:5.141, eth:5.25520383, btc:0.07164062, bybit:8914 }
+  { date:'2026/01/21', bnb:5.141, eth:5.25520383, btc:0.07164062, bybit:8914 },
+  { date:'2026/01/22', bnb:5.157, eth:5.50353122, btc:0.07309541, bybit:9500 }
 ];
 
-/* ===== 百分比计算 ===== */
+/* ===== 百分比计算（不改） ===== */
 const base = rawData[0];
 const bybitBaseDate = '2026/01/14';
 const bybitBase = rawData.find(d => d.date === bybitBaseDate);
