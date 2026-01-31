@@ -9,18 +9,33 @@
     h1 { text-align:center; margin:20px 0; }
 
     .container { display:flex; gap:16px; padding:16px; }
-    .left,.right { background:#fff; border-radius:8px; padding:12px; }
+
+    .left,.right {
+      background:#fff;
+      border-radius:8px;
+      padding:12px;
+    }
 
     .left {
       width:50%;
-      max-height:480px;
+      max-height:520px;
       overflow-y:auto;
     }
 
     .right { width:50%; }
 
-    table { width:100%; border-collapse:collapse; font-size:13px; }
-    th,td { border:1px solid #ddd; padding:6px 8px; text-align:right; }
+    table {
+      width:100%;
+      border-collapse:collapse;
+      font-size:13px;
+    }
+
+    th,td {
+      border:1px solid #ddd;
+      padding:6px 8px;
+      text-align:right;
+      white-space:nowrap;
+    }
 
     th {
       background:#f0f2f5;
@@ -29,10 +44,20 @@
       z-index:2;
     }
 
-    th:first-child, td:first-child { text-align:center; }
+    th:first-child, td:first-child {
+      text-align:center;
+    }
 
-    canvas { width:100%!important; height:420px!important; }
-    .note { font-size:12px; color:#666; margin-top:8px; }
+    canvas {
+      width:100%!important;
+      height:420px!important;
+    }
+
+    .note {
+      font-size:12px;
+      color:#666;
+      margin-top:8px;
+    }
   </style>
 </head>
 <body>
@@ -64,53 +89,59 @@
   <div class="right">
     <canvas id="lineChart"></canvas>
     <div class="note">
-      BNB / ETH / BTC / Aster 基准日：2025/12/12 ｜ Bybit 基准日：2026/01/14
+      BNB / ETH / BTC 基准日：2025/12/12 ｜ Bybit 基准日：2026/01/14 ｜ Aster：可变资产
     </div>
   </div>
 </div>
 
 <script>
-/* ===== 数据区（长期维护，只改这里） ===== */
+/* ===== 数据区（只维护这里） ===== */
 const rawData = [
-  { date:'2025/12/12', bnb:4.94, eth:4.89335652, btc:0.06806163, bybit:0,    aster:2749 },
-  { date:'2025/12/15', bnb:4.96, eth:4.97927232, btc:0.06831465, bybit:0,    aster:2749 },
-  { date:'2026/01/14', bnb:5.125,eth:5.21059708, btc:0.07003359, bybit:8564, aster:2749 },
-  { date:'2026/01/23', bnb:5.157,eth:5.49042010, btc:0.07332681, bybit:9567, aster:2749 },
-  { date:'2026/01/24', bnb:5.173,eth:5.51926262, btc:0.07347119, bybit:9624, aster:2737 },
+  { date:'2025/12/12', bnb:4.94, eth:4.89335652, btc:0.06806163, bybit:0, aster:2749 },
+  { date:'2025/12/15', bnb:4.96, eth:4.97927232, btc:0.06831465, bybit:0, aster:2749 },
+  { date:'2025/12/17', bnb:5.05, eth:5.00693555, btc:0.06825674, bybit:1000, aster:2749 },
+  { date:'2025/12/22', bnb:5.09, eth:5.06693069, btc:0.06853804, bybit:1796, aster:2749 },
+  { date:'2025/12/25', bnb:5.09, eth:5.14126780, btc:0.06909271, bybit:3171, aster:2749 },
+  { date:'2025/12/27', bnb:5.09, eth:5.17173604, btc:0.06920976, bybit:3189, aster:2749 },
+  { date:'2025/12/29', bnb:5.10, eth:5.17264088, btc:0.06920239, bybit:3195, aster:2749 },
+  { date:'2025/12/30', bnb:5.11, eth:5.21396609, btc:0.06961127, bybit:3260, aster:2749 },
+  { date:'2025/12/31', bnb:5.11, eth:5.22510837, btc:0.06968869, bybit:3271, aster:2749 },
+
+  { date:'2026/01/14', bnb:5.125, eth:5.21059708, btc:0.07003359, bybit:8564, aster:2749 },
+
+  { date:'2026/01/20', bnb:5.154, eth:5.47061225, btc:0.07306381, bybit:9315, aster:2749 },
+  { date:'2026/01/21', bnb:5.141, eth:5.25520383, btc:0.07164062, bybit:8914, aster:2749 },
+  { date:'2026/01/22', bnb:5.157, eth:5.50353122, btc:0.07309541, bybit:9500, aster:2749 },
+  { date:'2026/01/23', bnb:5.157, eth:5.49042010, btc:0.07332681, bybit:9567, aster:2749 },
+  { date:'2026/01/24', bnb:5.173, eth:5.51926262, btc:0.07347119, bybit:9624, aster:2737 },
   { date:'2026/01/26', bnb:5.171, eth:5.44305566, btc:0.07274687, bybit:9523, aster:2737 },
   { date:'2026/01/27', bnb:5.176, eth:5.57725949, btc:0.07366973, bybit:9825, aster:2737 },
   { date:'2026/01/28', bnb:5.179, eth:5.61599173, btc:0.07399279, bybit:9907, aster:2766 },
   { date:'2026/01/29', bnb:5.179, eth:5.62284509, btc:0.07398387, bybit:9905, aster:2766 },
-  { date:'2026/01/30', bnb:5.179, eth:5.45898729, btc:0.0703017, bybit:9025, aster:2766 },
+  { date:'2026/01/30', bnb:5.179, eth:5.45898729, btc:0.07030170, bybit:2766, aster:3766 },
 
-  
-
-
-
-
+  /* ✅ 新增 */
+  { date:'2026/01/31', bnb:5.179, eth:5.42264028, btc:0.07164993, bybit:9010, aster:2766 }
 ];
 
 /* ===== 百分比计算 ===== */
 const base = rawData[0];
 const bybitBaseDate = '2026/01/14';
 const bybitBase = rawData.find(d => d.date === bybitBaseDate);
-let bybitStarted = false;
 
 rawData.forEach(d => {
-  d.bnbP   = ((d.bnb   - base.bnb)   / base.bnb   * 100).toFixed(2);
-  d.ethP   = ((d.eth   - base.eth)   / base.eth   * 100).toFixed(2);
-  d.btcP   = ((d.btc   - base.btc)   / base.btc   * 100).toFixed(2);
-  d.asterP = ((d.aster - base.aster) / base.aster * 100).toFixed(2);
-
-  if (d.date === bybitBaseDate) bybitStarted = true;
-  d.bybitP = bybitStarted
-    ? ((d.bybit - bybitBase.bybit) / bybitBase.bybit * 100).toFixed(2)
-    : '0.00';
+  d.bnbP   = ((d.bnb - base.bnb) / base.bnb * 100).toFixed(2);
+  d.ethP   = ((d.eth - base.eth) / base.eth * 100).toFixed(2);
+  d.btcP   = ((d.btc - base.btc) / base.btc * 100).toFixed(2);
+  d.bybitP = (!bybitBase || d.date < bybitBaseDate)
+    ? '0.00'
+    : ((d.bybit - bybitBase.bybit) / bybitBase.bybit * 100).toFixed(2);
+  d.asterP = ((d.aster - rawData[0].aster) / rawData[0].aster * 100).toFixed(2);
 });
 
-/* ===== 表格 ===== */
+/* ===== 表格（只显示最近15行） ===== */
 const tbody = document.querySelector('#dataTable tbody');
-rawData.forEach(d => {
+rawData.slice(-15).forEach(d => {
   const tr = document.createElement('tr');
   tr.innerHTML = `
     <td>${d.date}</td>
@@ -130,22 +161,22 @@ rawData.forEach(d => {
 
 /* ===== 折线图 ===== */
 new Chart(document.getElementById('lineChart'), {
-  type:'line',
-  data:{
-    labels: rawData.map(d=>d.date),
-    datasets:[
-      { label:'BNB',    data:rawData.map(d=>d.bnbP),    borderWidth:2 },
-      { label:'ETH',    data:rawData.map(d=>d.ethP),    borderWidth:2 },
-      { label:'BTC',    data:rawData.map(d=>d.btcP),    borderWidth:2 },
-      { label:'Aster',  data:rawData.map(d=>d.asterP), borderWidth:2 },
-      { label:'Bybit',  data:rawData.map(d=>d.bybitP), yAxisID:'y1', borderWidth:2 }
+  type: 'line',
+  data: {
+    labels: rawData.map(d => d.date),
+    datasets: [
+      { label:'BNB',   data:rawData.map(d=>d.bnbP),   borderWidth:2 },
+      { label:'ETH',   data:rawData.map(d=>d.ethP),   borderWidth:2 },
+      { label:'BTC',   data:rawData.map(d=>d.btcP),   borderWidth:2 },
+      { label:'Bybit', data:rawData.map(d=>d.bybitP), borderWidth:2, yAxisID:'y1' },
+      { label:'Aster', data:rawData.map(d=>d.asterP), borderWidth:2 }
     ]
   },
-  options:{
+  options: {
     interaction:{ mode:'index', intersect:false },
     scales:{
       y:{ title:{ display:true, text:'资产 %' }},
-      y1:{ position:'right', grid:{ drawOnChartArea:false }}
+      y1:{ position:'right', grid:{ drawOnChartArea:false } }
     }
   }
 });
